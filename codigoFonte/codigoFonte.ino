@@ -80,9 +80,9 @@ void loop() {
     Leitura = analogRead(AnalogLDR);
     Brilho = map(Leitura, brilhoMinimo, brilhoMaximo, 10, 255);
     if(Brilho >= 220){
-      digitalWrite(ledPin, HIGH);
+      digitalWrite(lumenPin, HIGH);
     } else{
-      digitalWrite(ledPin, LOW);
+      digitalWrite(lumenPin, LOW);
     }
     //###################################
     
