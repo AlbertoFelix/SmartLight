@@ -6,11 +6,12 @@
 *
 */
 // defines pins numbers
+#define botton 2
 #define trigPin 4
 #define echoPin 5
 #define motorR 7
+#define ledOnOff 12
 #define motorL 44
-#define botton 10
 #define AnalogLDR A2
 #define lumenPin 52
 
@@ -18,12 +19,18 @@
 #define brilhoMaximo 1024
 #define brilhoMinimo 500
 long duration;
-int distance, Brilho = 0, Leitura = 0;
+int distance, Brilho = 0, Leitura = 0; 
+byte OnOff = 0;
 char turn = 'l';
 
-/*void limpeza(){
-  
-}*/
+void interruptor(){
+  OnOff = !OnOff;
+  if(OnOff == 0){
+    digitalWrite(ledOnOff, LOW);
+  } else{
+    digitalWrite(ledOnOff, HIGH);
+  }
+}
 
 void turnRight(){
   //digitalWrite(motorR, LOW);
@@ -46,6 +53,8 @@ void turnLeft(){
 void setup() {
 
     pinMode(botton, INPUT_PULLUP);
+    pinMode(ledOnOff, OUTPUT);
+    attachInterrupt(digitalPinToInterrupt(botton), interruptor, RISING);
     pinMode(motorR, OUTPUT);
     pinMode(motorL, OUTPUT);
     pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
@@ -55,52 +64,57 @@ void setup() {
 }
 
 void loop() {
-    digitalWrite(motorR, HIGH);
-    digitalWrite(motorL, HIGH);
-    
-    // Clears the trigPin
-    digitalWrite(trigPin, LOW);
-    delayMicroseconds(2);
-    // Sets the trigPin on HIGH state for 10 micro seconds
-    digitalWrite(trigPin, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(trigPin, LOW);
-    // Reads the echoPin, returns the sound wave travel time in microseconds
-    duration = pulseIn(echoPin, HIGH);
-    // Calculating the distance
-    distance = duration*0.034/2;
-    // Prints the distance on the Serial Monitor
-    /*delay(500);
-    Serial.print("Distance: ");
-    Serial.print(distance);
-    Serial.println("cm");
-    delay(500);*/
 
-    //Entrada analógica OK
-    Leitura = analogRead(AnalogLDR);
-    Brilho = map(Leitura, brilhoMinimo, brilhoMaximo, 10, 255);
-    if(Brilho >= 220){
-      digitalWrite(lumenPin, HIGH);
-    } else{
-      digitalWrite(lumenPin, LOW);
-    }
-    //###################################
+  if(OnOff == 0){
     
-    if(distance <= 2 && turn == 'l'){
-        digitalWrite(motorR, LOW);
-        digitalWrite(motorL, LOW);
-        turnRight();
-    }
-    digitalWrite(motorR, HIGH);
-    digitalWrite(motorL, HIGH);
-    
-    if(distance <= 2 && turn == 'r'){
-        digitalWrite(motorR, LOW);
-        digitalWrite(motorL, LOW);
-        turnLeft();
-    }
-    
-    digitalWrite(motorR, HIGH);
-    digitalWrite(motorL, HIGH);
+  }else{
+      digitalWrite(motorR, HIGH);
+      digitalWrite(motorL, HIGH);
+      
+      // Clears the trigPin
+      digitalWrite(trigPin, LOW);
+      delayMicroseconds(2);
+      // Sets the trigPin on HIGH state for 10 micro seconds
+      digitalWrite(trigPin, HIGH);
+      delayMicroseconds(10);
+      digitalWrite(trigPin, LOW);
+      // Reads the echoPin, returns the sound wave travel time in microseconds
+      duration = pulseIn(echoPin, HIGH);
+      // Calculating the distance
+      distance = duration*0.034/2;
+      // Prints the distance on the Serial Monitor
+      /*delay(500);
+      Serial.print("Distance: ");
+      Serial.print(distance);
+      Serial.println("cm");
+      delay(500);*/
+  
+      //Entrada analógica OK
+      Leitura = analogRead(AnalogLDR);
+      Brilho = map(Leitura, brilhoMinimo, brilhoMaximo, 10, 255);
+      if(Brilho >= 220){
+        digitalWrite(lumenPin, HIGH);
+      } else{
+        digitalWrite(lumenPin, LOW);
+      }
+      //###################################
+      
+      if(distance <= 2 && turn == 'l'){
+          digitalWrite(motorR, LOW);
+          digitalWrite(motorL, LOW);
+          turnRight();
+      }
+      digitalWrite(motorR, HIGH);
+      digitalWrite(motorL, HIGH);
+      
+      if(distance <= 2 && turn == 'r'){
+          digitalWrite(motorR, LOW);
+          digitalWrite(motorL, LOW);
+          turnLeft();
+      }
+      
+      digitalWrite(motorR, HIGH);
+      digitalWrite(motorL, HIGH);
+  } 
     
 }
