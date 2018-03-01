@@ -1,1 +1,10 @@
 http://www.instructables.com/id/Arduino-Battery-Voltage-Indicator/
+
+
+Circuito de proteção para acionamento dos réles
+http://www.instructables.com/id/Connecting-a-12V-Relay-to-Arduino/
+
+Apredendo a testar o relé que estamos utilizando
+https://tutorial.cytron.io/2012/08/01/identify-terminal-pins-of-a-relay-without-reference-to-datasheet-2/
+
+
