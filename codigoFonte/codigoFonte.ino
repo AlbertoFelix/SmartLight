@@ -11,11 +11,19 @@
 #define motorR 7
 #define motorL 44
 #define botton 10
+#define AnalogLDR A2
+#define lumenPin 52
 
 // defines variables
+#define brilhoMaximo 1024
+#define brilhoMinimo 500
 long duration;
-int distance;
+int distance, Brilho = 0, Leitura = 0;
 char turn = 'l';
+
+/*void limpeza(){
+  
+}*/
 
 void turnRight(){
   //digitalWrite(motorR, LOW);
@@ -36,11 +44,13 @@ void turnLeft(){
 }
 
 void setup() {
-  
+
+    pinMode(botton, INPUT_PULLUP);
     pinMode(motorR, OUTPUT);
     pinMode(motorL, OUTPUT);
     pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
     pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+    pinMode(lumenPin, OUTPUT);
     Serial.begin(9600); // Starts the serial communication
 }
 
@@ -65,6 +75,16 @@ void loop() {
     Serial.print(distance);
     Serial.println("cm");
     delay(500);*/
+
+    //Entrada analógica OK
+    Leitura = analogRead(AnalogLDR);
+    Brilho = map(Leitura, brilhoMinimo, brilhoMaximo, 10, 255);
+    if(Brilho >= 220){
+      digitalWrite(ledPin, HIGH);
+    } else{
+      digitalWrite(ledPin, LOW);
+    }
+    //###################################
     
     if(distance <= 2 && turn == 'l'){
         digitalWrite(motorR, LOW);
