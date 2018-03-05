@@ -36,17 +36,22 @@
 #define brilhoMinimo 500
 long duration;
 int distance, Brilho = 0, Leitura = 0, controleBrilho = 0; 
-byte OnOff = 1, OnOffSensores = 1;
+byte OnOff = 0, OnOffSensores = 0, vez = 0;
+
+// Inicializa o display no endereço 0x27
+LiquidCrystal_I2C lcd(0x27, 20, 4);
 
 
 void interruptor(){
   OnOff = !OnOff;
-  
+  delay(10);
+  vez = OnOff;  
 }
 
 void interruptorSensores(){
   OnOffSensores = !OnOffSensores;
-      
+  delay(10);
+  vez = OnOffSensores + 2;
 }
 
 void controlBrilho(){
@@ -58,12 +63,12 @@ void controlBrilho(){
     controleBrilho = 3;
   else if(controleBrilho == 3)
     controleBrilho = 0;
+   delay(150);
 }
 
 
 
-// Inicializa o display no endereço 0x27
-LiquidCrystal_I2C lcd(0x27, 20, 4);
+
 
 void setup() {
     // Leds conectados nos pinos PWM
@@ -107,20 +112,50 @@ void setup() {
 void loop() {
    
   if(OnOff == 0){
-    lcd.clear();
-    lcd.setCursor(2, 0);
-    lcd.print("Desligado");
-  }else{
+    analogWrite(led1, 0);
+    analogWrite(led2, 0);
+    analogWrite(led3, 0);
+    analogWrite(led4, 0);
+    analogWrite(led5, 0);
+    analogWrite(led6, 0);
+    analogWrite(led7, 0);
+    analogWrite(led8, 0);
+    analogWrite(led9, 0);
+    analogWrite(led10, 0);
+    if (vez == 0) {
       lcd.clear();
-      lcd.setCursor(2, 0);
-      lcd.print("Ligado");
-      if(OnOffSensores == 0){
+      lcd.setCursor(1, 0);
+      lcd.print("Desligado");
+      vez = 1;
+    }
+    
+  }else{
+      if (vez == 1) {
         lcd.clear();
-        lcd.setCursor(2, 0);
-        lcd.print("Sensores");
-        lcd.setCursor(2, 1);
-        lcd.print("Desligados");
-        if(controleBrilho == 0){
+        lcd.setCursor(1, 0);
+        lcd.print("Ligado");
+        if (OnOffSensores == 0) {
+          vez = 2;
+        }
+        else {
+          vez = 3;
+        }
+        
+      }
+      
+      if(OnOffSensores == 0){
+        if (vez == 2) {
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("Sensores Desl.");
+          
+          vez = 4;
+        }
+
+        if (vez == 4) {
+          if(controleBrilho == 0){
+          lcd.setCursor(0, 0);
+          lcd.print("Brilho: 0%       ");
           analogWrite(led1, 0);
           analogWrite(led2, 0);
           analogWrite(led3, 0);
@@ -132,6 +167,8 @@ void loop() {
           analogWrite(led9, 0);
           analogWrite(led10, 0);
         } else if(controleBrilho == 1){
+          lcd.setCursor(0, 0);
+          lcd.print("Brilho: 25%       ");
           analogWrite(led1, 100);
           analogWrite(led2, 100);
           analogWrite(led3, 100);
@@ -143,6 +180,8 @@ void loop() {
           analogWrite(led9, 100);
           analogWrite(led10, 100);
         } else if(controleBrilho == 2){
+          lcd.setCursor(0, 0);
+          lcd.print("Brilho: 50%          ");
           analogWrite(led1, 170);
           analogWrite(led2, 170);
           analogWrite(led3, 170);
@@ -154,6 +193,8 @@ void loop() {
           analogWrite(led9, 170);
           analogWrite(led10, 170);
         } else if(controleBrilho == 3){
+          lcd.setCursor(0, 0);
+          lcd.print("Brilho: 100%       ");
           analogWrite(led1, 255);
           analogWrite(led2, 255);
           analogWrite(led3, 255);
@@ -165,12 +206,18 @@ void loop() {
           analogWrite(led9, 255);
           analogWrite(led10, 255);
         }
+        } 
+        
       }else{
-          lcd.clear();
-          lcd.setCursor(2, 0);
-          lcd.print("Sensores");
-          lcd.setCursor(2, 1);
-          lcd.print("Ligados");
+          if (vez == 3) {
+            lcd.clear();
+            lcd.setCursor(2, 0);
+            lcd.print("Sensores");
+            lcd.setCursor(2, 1);
+            lcd.print("Ligados");
+            vez = 4;
+          }
+          
           
           // Limpa o trigPin
           digitalWrite(trigPin, LOW);
@@ -185,18 +232,18 @@ void loop() {
           // Calculando a distância
           distance = duration*0.034/2;
           // Prints the distance on the Serial Monitor
-          /*delay(500);
+          /*delay(500);*/
           Serial.print("Distance: ");
           Serial.print(distance);
           Serial.println("cm");
-          delay(500);*/
+          //delay(500);
 
           //Entrada analógica OK***********************************************/
           Leitura = analogRead(AnalogLDR);
           Brilho = map(Leitura, brilhoMinimo, brilhoMaximo, 10, 255);
           Serial.println(Leitura);
           Serial.println(Brilho);
-          if(Brilho >= 220 || distance == 5){
+          if(Brilho >= 220 || distance <= 60){
             analogWrite(led1, 255);
             analogWrite(led2, 255);
             analogWrite(led3, 255);
