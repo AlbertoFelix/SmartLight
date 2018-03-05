@@ -1,120 +1,227 @@
-/*
+  /*
 * Ultrasonic Sensor HC-SR04 and Arduino Tutorial
 *
 * Crated by Dejan Nedelkovski,
 * www.HowToMechatronics.com
 *
+*Liga desliga luminária
+*Liga desliga sensores
+*Controla Brilho
 */
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+
+
 // defines pins numbers
-#define botton 2
-#define trigPin 4
-#define echoPin 5
-#define motorR 7
-#define ledOnOff 12
-#define motorL 44
+#define buttonOnOff 18
+#define buttonOnOffSensores 19
+#define buttonBrilho 2
+#define trigPin 22
+#define echoPin 23
 #define AnalogLDR A2
-#define lumenPin 52
+#define led1 12
+#define led2 3
+#define led3 4
+#define led4 5
+#define led5 6
+#define led6 7
+#define led7 8
+#define led8 9
+#define led9 10
+#define led10 11
 
 // defines variables
 #define brilhoMaximo 1024
 #define brilhoMinimo 500
 long duration;
-int distance, Brilho = 0, Leitura = 0; 
-byte OnOff = 0;
-char turn = 'l';
+int distance, Brilho = 0, Leitura = 0, controleBrilho = 0; 
+byte OnOff = 1, OnOffSensores = 1;
+
 
 void interruptor(){
   OnOff = !OnOff;
-  if(OnOff == 0){
-    digitalWrite(ledOnOff, LOW);
-  } else{
-    digitalWrite(ledOnOff, HIGH);
-  }
+  
 }
 
-void turnRight(){
-  //digitalWrite(motorR, LOW);
-  digitalWrite(motorL, HIGH);
-  turn = 'r';
-  delay(500);
-  digitalWrite(motorL, LOW);
-  delay(100);  
+void interruptorSensores(){
+  OnOffSensores = !OnOffSensores;
+      
 }
 
-void turnLeft(){
-  digitalWrite(motorR, HIGH);
-  turn = 'l';
-  //digitalWrite(motorL, LOW);
-  delay(500);
-  digitalWrite(motorR, LOW);  
-  delay(100);
+void controlBrilho(){
+  if(controleBrilho == 0)
+    controleBrilho = 1;
+  else if(controleBrilho == 1)
+    controleBrilho = 2;
+  else if(controleBrilho == 2)
+    controleBrilho = 3;
+  else if(controleBrilho == 3)
+    controleBrilho = 0;
 }
+
+
+
+// Inicializa o display no endereço 0x27
+LiquidCrystal_I2C lcd(0x27, 20, 4);
 
 void setup() {
+    // Leds conectados nos pinos PWM
+    pinMode(led1, OUTPUT);
+    pinMode(led2, OUTPUT);
+    pinMode(led3, OUTPUT);
+    pinMode(led4, OUTPUT);
+    pinMode(led5, OUTPUT);
+    pinMode(led6, OUTPUT);
+    pinMode(led7, OUTPUT);
+    pinMode(led8, OUTPUT);
+    pinMode(led9, OUTPUT);
+    pinMode(led10, OUTPUT);
 
-    pinMode(botton, INPUT_PULLUP);
-    pinMode(ledOnOff, OUTPUT);
-    attachInterrupt(digitalPinToInterrupt(botton), interruptor, RISING);
-    pinMode(motorR, OUTPUT);
-    pinMode(motorL, OUTPUT);
-    pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
-    pinMode(echoPin, INPUT); // Sets the echoPin as an Input
-    pinMode(lumenPin, OUTPUT);
-    Serial.begin(9600); // Starts the serial communication
+    //Botão liga e desliga sistema
+    pinMode(buttonOnOff, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(buttonOnOff), interruptor, RISING);
+
+    //Botão liga e desliga Sensores
+    pinMode(buttonOnOffSensores, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(buttonOnOffSensores), interruptorSensores, RISING);
+    
+
+    //Botão controle do brilho
+    pinMode(buttonBrilho, INPUT_PULLUP);
+    attachInterrupt(digitalPinToInterrupt(buttonBrilho), controlBrilho, RISING);
+
+    
+    pinMode(trigPin, OUTPUT); // trigPin como saída
+    pinMode(echoPin, INPUT); // echoPin como entrada
+     
+    Serial.begin(9600); 
+    
+    // Inicializa o display LCD 16x2
+   lcd.init();
+   
+   // Liga a luz de fundo do LCD
+   lcd.setBacklight(HIGH);
 }
 
 void loop() {
-
+   
   if(OnOff == 0){
-    
+    lcd.clear();
+    lcd.setCursor(2, 0);
+    lcd.print("Desligado");
   }else{
-      digitalWrite(motorR, HIGH);
-      digitalWrite(motorL, HIGH);
-      
-      // Clears the trigPin
-      digitalWrite(trigPin, LOW);
-      delayMicroseconds(2);
-      // Sets the trigPin on HIGH state for 10 micro seconds
-      digitalWrite(trigPin, HIGH);
-      delayMicroseconds(10);
-      digitalWrite(trigPin, LOW);
-      // Reads the echoPin, returns the sound wave travel time in microseconds
-      duration = pulseIn(echoPin, HIGH);
-      // Calculating the distance
-      distance = duration*0.034/2;
-      // Prints the distance on the Serial Monitor
-      /*delay(500);
-      Serial.print("Distance: ");
-      Serial.print(distance);
-      Serial.println("cm");
-      delay(500);*/
-  
-      //Entrada analógica OK
-      Leitura = analogRead(AnalogLDR);
-      Brilho = map(Leitura, brilhoMinimo, brilhoMaximo, 10, 255);
-      if(Brilho >= 220){
-        digitalWrite(lumenPin, HIGH);
-      } else{
-        digitalWrite(lumenPin, LOW);
+      lcd.clear();
+      lcd.setCursor(2, 0);
+      lcd.print("Ligado");
+      if(OnOffSensores == 0){
+        lcd.clear();
+        lcd.setCursor(2, 0);
+        lcd.print("Sensores");
+        lcd.setCursor(2, 1);
+        lcd.print("Desligados");
+        if(controleBrilho == 0){
+          analogWrite(led1, 0);
+          analogWrite(led2, 0);
+          analogWrite(led3, 0);
+          analogWrite(led4, 0);
+          analogWrite(led5, 0);
+          analogWrite(led6, 0);
+          analogWrite(led7, 0);
+          analogWrite(led8, 0);
+          analogWrite(led9, 0);
+          analogWrite(led10, 0);
+        } else if(controleBrilho == 1){
+          analogWrite(led1, 100);
+          analogWrite(led2, 100);
+          analogWrite(led3, 100);
+          analogWrite(led4, 100);
+          analogWrite(led5, 100);
+          analogWrite(led6, 100);
+          analogWrite(led7, 100);
+          analogWrite(led8, 100);
+          analogWrite(led9, 100);
+          analogWrite(led10, 100);
+        } else if(controleBrilho == 2){
+          analogWrite(led1, 170);
+          analogWrite(led2, 170);
+          analogWrite(led3, 170);
+          analogWrite(led4, 170);
+          analogWrite(led5, 170);
+          analogWrite(led6, 170);
+          analogWrite(led7, 170);
+          analogWrite(led8, 170);
+          analogWrite(led9, 170);
+          analogWrite(led10, 170);
+        } else if(controleBrilho == 3){
+          analogWrite(led1, 255);
+          analogWrite(led2, 255);
+          analogWrite(led3, 255);
+          analogWrite(led4, 255);
+          analogWrite(led5, 255);
+          analogWrite(led6, 255);
+          analogWrite(led7, 255);
+          analogWrite(led8, 255);
+          analogWrite(led9, 255);
+          analogWrite(led10, 255);
+        }
+      }else{
+          lcd.clear();
+          lcd.setCursor(2, 0);
+          lcd.print("Sensores");
+          lcd.setCursor(2, 1);
+          lcd.print("Ligados");
+          
+          // Limpa o trigPin
+          digitalWrite(trigPin, LOW);
+          delayMicroseconds(2);
+          
+          // Seta o trigPin para estado HIGH por 10 micro segundos
+          digitalWrite(trigPin, HIGH);
+          delayMicroseconds(10);
+          digitalWrite(trigPin, LOW);
+          // Lê o echoPin, retorna o tempo de viajem da onda sonora em microsegundos
+          duration = pulseIn(echoPin, HIGH);
+          // Calculando a distância
+          distance = duration*0.034/2;
+          // Prints the distance on the Serial Monitor
+          /*delay(500);
+          Serial.print("Distance: ");
+          Serial.print(distance);
+          Serial.println("cm");
+          delay(500);*/
+
+          //Entrada analógica OK***********************************************/
+          Leitura = analogRead(AnalogLDR);
+          Brilho = map(Leitura, brilhoMinimo, brilhoMaximo, 10, 255);
+          Serial.println(Leitura);
+          Serial.println(Brilho);
+          if(Brilho >= 220 || distance == 5){
+            analogWrite(led1, 255);
+            analogWrite(led2, 255);
+            analogWrite(led3, 255);
+            analogWrite(led4, 255);
+            analogWrite(led5, 255);
+            analogWrite(led6, 255);
+            analogWrite(led7, 255);
+            analogWrite(led8, 255);
+            analogWrite(led9, 255);
+            analogWrite(led10, 255);
+          } else{
+            analogWrite(led1, 0);
+            analogWrite(led2, 0);
+            analogWrite(led3, 0);
+            analogWrite(led4, 0);
+            analogWrite(led5, 0);
+            analogWrite(led6, 0);
+            analogWrite(led7, 0);
+            analogWrite(led8, 0);
+            analogWrite(led9, 0);
+            analogWrite(led10, 0);
+          }
+          /*********************************************************************/
       }
-      //###################################
       
-      if(distance <= 2 && turn == 'l'){
-          digitalWrite(motorR, LOW);
-          digitalWrite(motorL, LOW);
-          turnRight();
-      }
-      digitalWrite(motorR, HIGH);
-      digitalWrite(motorL, HIGH);
-      
-      if(distance <= 2 && turn == 'r'){
-          digitalWrite(motorR, LOW);
-          digitalWrite(motorL, LOW);
-          turnLeft();
-      }
-      
-      digitalWrite(motorR, HIGH);
-      digitalWrite(motorL, HIGH);
   } 
     
 }
