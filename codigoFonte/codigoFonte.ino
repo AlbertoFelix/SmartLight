@@ -1,13 +1,3 @@
-  /*
-* Ultrasonic Sensor HC-SR04 and Arduino Tutorial
-*
-* Crated by Dejan Nedelkovski,
-* www.HowToMechatronics.com
-*
-*Liga desliga luminária
-*Liga desliga sensores
-*Controla Brilho
-*/
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
